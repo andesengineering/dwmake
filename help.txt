@@ -1,0 +1,39 @@
+Available targets:
+
+clean       - Cleans all object files.  Useful when rebuilding a submodule.
+              This will also work at the top level, but it may be more
+              efficient to remove the ‘build’ directory.
+
+clobber     - Cleans all object files.  Additionally removes targets
+              (executable, library, plug-in)
+cleandeps   - Cleans all dependency files.  Useful if a header file has been
+              removed or added.
+
+cleantarget - Removes only the target, but not the objects.  Useful for
+              re-linking a target.
+
+cleant      - alias for 'cleantarget'
+
+cleanstaging- Removes staging directory for current platform.  Useful when
+              version number has increased.
+
+quick       - Parallel build.  Performs a depth-first build, and builds with the
+              number of threads specified in the J parameter.  Current
+              configuration is set to $(J)
+
+help        - Prints this help message to the screen
+
+release     - Specifically builds for release.  This overrides the BUILD_FLAVOR
+              parameter from make.conf (currently set to $(BUILD_FLAVOR)
+
+debug       - Specifically builds for debug.  This overrides the BUILD_FLAVOR
+              parameter from make.conf (currently set to $(BUILD_FLAVOR)
+
+version     - Prints the product version number.  This is useful for automated
+              build scripts.
+
+all         - Builds both release and debug.
+
+all-flavors - Builds both release and debug.
+
+all-flavors-quick - Builds both release and debug with ‘quick’ for parallel builds
