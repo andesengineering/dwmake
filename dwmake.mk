@@ -137,7 +137,7 @@ cleantarget:
 
 %.o: %.cpp
 $(OUTDIR)/%.o: %.cpp $(OUTDIR)/%.d | $(OUTDIR)
-	@echo compiling $(notdir $@)
+	@echo compiling $(notdir $<)
 	$(Q)$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 ifdef SPIR_V_SHADERS
