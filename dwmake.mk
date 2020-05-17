@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-sinclude $(WD)/.dwmake
+sinclude .dwmake
 
 ARCH                ?= $(shell uname -p)
 TARGET_ROOT         ?= /
@@ -29,9 +29,10 @@ TARGET_LIB          := $(TARGET_ROOT)/lib/$(TARGET_PLATFORM)
 TARGET_ULIB         := $(TARGET_ROOT)/usr/lib/$(TARGET_PLATFORM)
 TARGET_LINKER       := $(TARGET_LIB)/ld-linux-$(ARCH)
 
-CXXFLAGS            := --sysroot=$(TARGET_ROOT) 
+CXXFLAGS            := --sysroot=$(TARGET_ROOT)
 
-OUTDIR              := .build/$(TARGET_PLATFORM)
+BUILDDIR            := .dwbuild
+OUTDIR              := $(BUILDDIR)/$(TARGET_PLATFORM)
 
 DEPFLAGS            = -MT $@ -MMD -MP -MF $(OUTDIR)/$*.d
 
@@ -72,7 +73,7 @@ QUIET     ?= 1
 ifeq ($(QUIET),1)
     Q     := @
 else
-    Q     := 
+    Q     :=
 endif
 
 INC_FLAGS += $(TARGET_INCLUDES)
@@ -83,32 +84,44 @@ CXXFILES  ?= $(wildcard *.cpp)
 OBJS := $(addprefix $(OUTDIR)/,$(CXXFILES:.cpp=.o))
 
 ifdef SHADER_FILES
-include ${DWMAKE}/spirv_defs.mk 
+include ${DWMAKE}/spirv_defs.mk
 endif
 
 PRELINK = $(OBJS)
+
+ifdef SUBDIRS
+include $(DWMAKE)/subdirs.mk
+endif
 
 ifdef DYNAMIC_LIBNAME
     DYNAMIC_LIB = $(OUTDIR)/lib$(DYNAMIC_LIBNAME).so
     SONAME = lib$(DYNAMIC_LIBNAME).so$(REV)
     LDFLAGS += -Wl,-soname,$(SONAME)
-#    TARGET := $(DYNAMIC_LIB)
 endif
 
+ifdef STATIC_LIBNAME
+    STATIC_LIB = $(OUTDIR)/lib$(STATIC_LIBNAME).a
+endif
+
+CLOBBER_FILES = $(BUILDDIR)
 
 ifdef EXEC
   EXEC := $(OUTDIR)/$(EXEC)
-#  TARGET := $(EXEC)
-  CLOBBER_FILES += $(EXEC) $(notdir $(EXEC))
+  CLOBBER_FILES += $(notdir $(EXEC))
 endif
 
-TARGET = $(EXEC) $(DYNAMIC_LIB) $(PLUGIN)
+ifdef INSTALL_FILES
+  TARGET = $(INSTALL_FILES)
+else
+  TARGET = $(EXEC) $(DYNAMIC_LIB) $(STATIC_LIB) $(PLUGIN)
+  INSTALL_FILES ?= $(TARGET)
+endif
 
 ifeq ($(TARGET),)
-    $(error TARGET not defined)
+  $(error TARGET not defined)
 endif
 
-target: $(OUTDIR) $(PREREQUISITES) $(TARGET) stage
+target: $(PREREQUISITES) $(TARGET) stage
 
 $(DYNAMIC_LIB) : $(PRELINK)
 	@echo linking $(notdir $@) ...
@@ -117,8 +130,13 @@ ifeq ($(DO_STRIP),1)
 	$(Q)$(STRIP) $@
 endif
 
+$(STATIC_LIB) : $(PRELINK)
+	@echo creating static library $(notdir $@) ...
+	$(Q)ar rcs $@ $(OBJS)
+	$(Q)ranlib $@
+	$(Q)ln -sf $@ .
 
-$(EXEC): $(PRELINK) 
+$(EXEC): $(PRELINK)
 	@echo linking $(notdir $@) ...
 	$(Q)$(CXX) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
 ifeq ($(BUILD_MODE),release)
@@ -126,14 +144,25 @@ ifeq ($(BUILD_MODE),release)
 endif
 	$(Q)ln -sf $(EXEC) .
 
-clean: 
+clean:
+	$(Q)echo cleaning $(OBJS)
 	$(Q)rm -f $(OBJS)
 
 clobber:  clean
-	$(Q)rm -f $(CLOBBER_FILES)
+	$(Q)rm -rf $(CLOBBER_FILES)
 
 cleantarget:
 	$(Q)rm -f $(TARGET)
+
+install: $(INSTALL_FILES:=.install)
+
+$(INSTALL_FILES:=.install):
+ifdef INSTALL_LOCATION
+	$(Q)echo installing $(basename $@) ...
+	$(Q)[ -d $(basename $@) ] && \
+        install -d $(basename $@) $(INSTALL_LOCATION)/$(notdir $(basename $@)) || \
+        install -D $(basename $@) $(INSTALL_LOCATION)/$(notdir $(basename $@))
+endif
 
 %.o: %.cpp
 $(OUTDIR)/%.o: %.cpp $(OUTDIR)/%.d | $(OUTDIR)
@@ -151,10 +180,11 @@ stage:
 ifdef STAGE_DIR
 	@ln -sf `pwd`/$(strip $(TARGET)) $(STAGE_DIR)/$(notdir $(strip $(TARGET)))
 endif
+	@$(Q)$(POSTSTAGE)
 
 DEPFILES := $(CXXFILES:%.cpp=$(OUTDIR)/%.d)
 
-$(DEPFILES): 
+$(DEPFILES):
 
 include $(wildcard $(DEPFILES))
 

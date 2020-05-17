@@ -36,13 +36,10 @@ makedwmakefile()
 
 if [ ! -f .dwmake ]
 then
-  /usr/bin/make $*
-  exit 0
+    exec /usr/bin/make $*
 else
-  WD=`pwd`
-  make WD="${WD}" -C ${WD} --makefile=${DWMAKE}/dwmake.mk $*
+    exec /usr/bin/make --makefile=${DWMAKE}/dwmake.mk $*
 fi
-
 
 exit 0
 
