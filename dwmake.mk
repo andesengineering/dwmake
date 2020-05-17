@@ -75,6 +75,7 @@ ifeq ($(QUIET),1)
 else
     Q     :=
 endif
+DO_STRIP  ?= 1
 
 INC_FLAGS += $(TARGET_INCLUDES)
 CXXFLAGS  += $(STD_FLAGS) $(INC_FLAGS) $(DEF_FLAGS) $(O_FLAGS) $(PIC_FLAGS) $(WARN_FLAGS)
@@ -111,6 +112,7 @@ ifdef EXEC
 endif
 
 ifdef INSTALL_FILES
+$(info INSTALL_FILES is ==$(INSTALL_FILES)==)
   TARGET = $(INSTALL_FILES)
 else
   TARGET = $(EXEC) $(DYNAMIC_LIB) $(STATIC_LIB) $(PLUGIN)
@@ -154,14 +156,14 @@ clobber:  clean
 cleantarget:
 	$(Q)rm -f $(TARGET)
 
-install: $(INSTALL_FILES:=.install)
+install: $(TARGET)  $(INSTALL_FILES:=.install)
 
 $(INSTALL_FILES:=.install):
 ifdef INSTALL_LOCATION
 	$(Q)echo installing $(basename $@) ...
-	$(Q)[ -d $(basename $@) ] && \
-        install -d $(basename $@) $(INSTALL_LOCATION)/$(notdir $(basename $@)) || \
-        install -D $(basename $@) $(INSTALL_LOCATION)/$(notdir $(basename $@))
+	$(Q)[ -f $(basename $@) ] && \
+        install -D $(basename $@) $(INSTALL_LOCATION)/$(notdir $(basename $@)) ||\
+            $(foreach f,$(shell find $(basename $@) -type f), install -D $f $(INSTALL_LOCATION)/$f; )
 endif
 
 %.o: %.cpp
