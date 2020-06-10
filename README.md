@@ -28,7 +28,8 @@ While you are editing .bashrc, add the following line as well to define the DWMA
     export DWMAKE=/path/to/dwmake
 
 
-# Copy dwmake.sh from the clone directory to your home bin directory.  Notice that the .sh extension is dropped in the copy
+# Copy dwmake.sh
+Coy dwmake.sh from the clone directory to your home bin directory.  Notice that the .sh extension is dropped in the copy
 
     $ cp dwmake.sh ~/bin/dwmake
 
