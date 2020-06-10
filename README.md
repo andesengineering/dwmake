@@ -6,11 +6,11 @@ DWMake is nothing more than some gnu makefiles with pre-defined targets, rules a
 
 The following set-up can be modified to your preferences.  It uses a home bin directory and aliases 'make' to point to 'dwmake'.  The dwmake script calls /usr/bin/make if no .dwmake file exists in the current directory so the redefinition of 'make' is benign.
 
-### 1. Clone the repository
+### Clone the repository
 
     git clone https://github.com/andesengineering/dwmake
 
-### 2. Create local bin directory and configure in your .bashrc
+### Create local bin directory and configure in your .bashrc
 
     $ mkdir ~/bin
     $ vi ~/.bashrc
@@ -28,12 +28,12 @@ While you are editing .bashrc, add the following line as well to define the DWMA
     export DWMAKE=/path/to/dwmake
 
 
-### 3. Copy dwmake.sh
+### Copy dwmake.sh
 Copy dwmake.sh from the clone directory to your home bin directory.  Notice that the .sh extension is dropped in the copy
 
     $ cp dwmake.sh ~/bin/dwmake
 
-### 4. Add this alias to your .bash_aliases file
+### Add this alias to your .bash_aliases file
 
    $ echo "alias make='dwmake'" >> ~/.bash_aliases
 
