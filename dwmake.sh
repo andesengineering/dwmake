@@ -1,38 +1,12 @@
 #!/bin/bash
 
-makedwmakefile()
+bye()
 {
-  echo "What target are you building?"
-  echo "1. EXEC"
-  echo "2. DYNAMIC_LIB" 
-  echo "3. STATIC_LIB" 
-  echo "4. DYNAMIC_PLUGIN" 
-  echo -n "[1]: "
-
-  target="EXEC"
-  read ans
-  echo ans is ==${ans}==
-
-
-  case ${ans} in 
-    1) target="EXEC";;
-    2) target="DYNAMIC_LIB" ;;
-    3) target="STATIC_LIB" ;;
-    4) target="DYNAMIC_PLUGIN";;
-    *) ;;
-  esac
-
-
-  case ${target} in
-    EXEC)
-      echo -n "EXEC name? "
-         read name;
-         echo "EXEC = " $name >> .dwmake
-           ;;
-
-  esac
+    echo $1
+    exit 1
 }
 
+[ -z "${DWMAKE}" ] && bye "DWMAKE environmental variable not set.  DWMAKE should be set to the directory where dwmake.mk is contained"
 
 if [ ! -f .dwmake ]
 then
