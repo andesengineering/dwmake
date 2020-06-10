@@ -1,8 +1,8 @@
-###DWMAKE
+### DWMAKE
 
 DWMake is nothing more than some gnu makefiles with pre-defined targets, rules and definitions to create an environment for building C++ files efficiently in the Linux environment.  
 
-##Configure
+## Configure
 
 The following set-up can be modified to your preferences.  It uses a home bin directory and aliases 'make' to point to 'dwmake'.  The dwmake script calls /usr/bin/make if no .dwmake file exists in the current directory so the redefinition of 'make' is benign.
 
@@ -29,7 +29,7 @@ While you are editing .bashrc, add the following line as well to define the DWMA
 
 
 # Copy dwmake.sh
-Coy dwmake.sh from the clone directory to your home bin directory.  Notice that the .sh extension is dropped in the copy
+Copy dwmake.sh from the clone directory to your home bin directory.  Notice that the .sh extension is dropped in the copy
 
     $ cp dwmake.sh ~/bin/dwmake
 
