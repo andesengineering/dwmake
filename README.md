@@ -83,3 +83,17 @@ just type 'make':
         $ make 
         $ make clean
         $ make clobber
+
+## Predefined definitions
+
+        INC_FLAGS  - include paths
+            e.g. INC_FLAGS = -I../include -I/usr/local/include
+
+        DEF_FLAGS  - definition flags
+            e.g. DEF_FLAGS = -DMY_DEFINITION
+
+        LIBS       - libraries for linking (can include library paths
+            e.g.  LIBS = -lX11 -L /usr/local/lib -lfl
+
+
+## FAQ
