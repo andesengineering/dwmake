@@ -48,10 +48,12 @@ DYNAMIC_LIB_ARGS  := -shared -Bsymbolic
 
 
 BUILD_MODE      ?= release
+DO_STRIP  ?= 1
 ifeq ($(BUILD_MODE),release)
   O_FLAGS       := -O3
 else
-  O_FLAGS       := -g3
+  O_FLAGS       := -g3 -ggdb
+  DO_STRIP  := 0
 endif
 
 PIC_FLAGS   := -fPIC
@@ -75,12 +77,19 @@ ifeq ($(QUIET),1)
 else
     Q     :=
 endif
-DO_STRIP  ?= 1
 
 INC_FLAGS += $(TARGET_INCLUDES)
 CXXFLAGS  += $(STD_FLAGS) $(INC_FLAGS) $(DEF_FLAGS) $(O_FLAGS) $(PIC_FLAGS) $(WARN_FLAGS)
 LDFLAGS   += $(O_FLAGS)
 CXXFILES  ?= $(wildcard *.cpp)
+
+ifdef ERROR_LIMIT
+  ifeq ($(USE_CLANG),1)
+    CXXFLAGS += -ferror-limit=$(ERROR_LIMIT)
+    else
+    CXXFLAGS += -fmax-errors=$(ERROR_LIMIT)
+  endif
+endif
 
 OBJS := $(addprefix $(OUTDIR)/,$(CXXFILES:.cpp=.o))
 
@@ -166,16 +175,19 @@ ifdef INSTALL_LOCATION
             $(foreach f,$(shell find $(basename $@) -type f), install -D $f $(INSTALL_LOCATION)/$f; )
 endif
 
+$(OBJS) : | $(OUTDIR)
+
 %.o: %.cpp
 $(OUTDIR)/%.o: %.cpp $(OUTDIR)/%.d | $(OUTDIR)
 	@echo compiling $(notdir $<)
-	$(Q)$(CXX) $(DEPFLAGS) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(Q)$(CXX) $(O_FLAGS) $(DEPFLAGS) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 ifdef SPIR_V_SHADERS
 include ${DWMAKE}/spirv_rules.mk
 endif
 
 $(OUTDIR) $(MKDIRS):
+	$(Q)echo MAKING DIRECTORY $@
 	$(Q)mkdir -p $@
 
 stage:
