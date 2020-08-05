@@ -83,10 +83,12 @@ CXXFLAGS  += $(STD_FLAGS) $(INC_FLAGS) $(DEF_FLAGS) $(O_FLAGS) $(PIC_FLAGS) $(WA
 LDFLAGS   += $(O_FLAGS)
 CXXFILES  ?= $(wildcard *.cpp)
 
+PLUGIN_PREFIX ?= dwmake-plugin
+
 ifdef ERROR_LIMIT
   ifeq ($(USE_CLANG),1)
     CXXFLAGS += -ferror-limit=$(ERROR_LIMIT)
-    else
+  else
     CXXFLAGS += -fmax-errors=$(ERROR_LIMIT)
   endif
 endif
@@ -103,17 +105,26 @@ ifdef SUBDIRS
 include $(DWMAKE)/subdirs.mk
 endif
 
+CLOBBER_FILES = $(BUILDDIR)
+
+ifdef PLUGIN_NAME
+    PLUGIN = $(OUTDIR)/lib$(PLUGIN_PREFIX)-$(strip $(PLUGIN_NAME)).so
+    SONAME = lib$(PLUGIN_PREFIX)-$(strip $(PLUGIN_NAME)).so$(REV)
+    LDFLAGS += -Wl,-soname,$(SONAME)
+    CLOBBER_FILES += $(notdir $(PLUGIN))
+endif
+
 ifdef DYNAMIC_LIBNAME
     DYNAMIC_LIB = $(OUTDIR)/lib$(DYNAMIC_LIBNAME).so
     SONAME = lib$(DYNAMIC_LIBNAME).so$(REV)
     LDFLAGS += -Wl,-soname,$(SONAME)
+    CLOBBER_FILES += $(notdir $(DYNAMIC_LIB))
 endif
 
 ifdef STATIC_LIBNAME
     STATIC_LIB = $(OUTDIR)/lib$(STATIC_LIBNAME).a
 endif
 
-CLOBBER_FILES = $(BUILDDIR)
 
 ifdef EXEC
   EXEC := $(OUTDIR)/$(EXEC)
@@ -134,7 +145,7 @@ endif
 
 target: $(PREREQUISITES) $(TARGET) stage
 
-$(DYNAMIC_LIB) : $(PRELINK)
+$(DYNAMIC_LIB) $(PLUGIN) : $(PRELINK)
 	@echo linking $(notdir $@) ...
 	$(Q)$(CXX) $(LDFLAGS) $(DYNAMIC_LIB_ARGS) $(OBJS) $(LIBS) -o $@
 ifeq ($(DO_STRIP),1)
@@ -187,7 +198,6 @@ include ${DWMAKE}/spirv_rules.mk
 endif
 
 $(OUTDIR) $(MKDIRS):
-	$(Q)echo MAKING DIRECTORY $@
 	$(Q)mkdir -p $@
 
 stage:
