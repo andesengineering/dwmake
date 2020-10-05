@@ -33,9 +33,10 @@ Copy dwmake.sh from the clone directory to your home bin directory.  Notice that
 
     $ cp dwmake.sh ~/bin/dwmake
 
-### Add this alias to your .bash_aliases file
+### Add this alias to your .bash_aliases file and source it to make the alias active
 
    $ echo "alias make='dwmake'" >> ~/.bash_aliases
+   $ echo source ~/.bash_aliases
 
 That's it.  You're ready to use dwmake.
 
